@@ -14,27 +14,34 @@ app.post("/scrape-qbcc", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: "new",
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
+      executablePath: "/usr/bin/google-chrome",
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu"
+      ]
     });
 
     const page = await browser.newPage();
 
-    await page.goto("https://www.onlineservices.qbcc.qld.gov.au/onlinelicencesearch/visualelements/searchbsalicenseecontent.aspx", {
-      waitUntil: "networkidle2"
-    });
+    await page.goto(
+      "https://www.onlineservices.qbcc.qld.gov.au/onlinelicencesearch/visualelements/searchbsalicenseecontent.aspx",
+      { waitUntil: "domcontentloaded" }
+    );
 
     await page.type("#searchControl_txtLicenceNumber", qbcc);
 
     await Promise.all([
       page.click("#searchControl_btnSearch"),
-      page.waitForNavigation({ waitUntil: "networkidle2" })
+      page.waitForNavigation({ waitUntil: "domcontentloaded" })
     ]);
 
     const licenceClass = await page.evaluate(() => {
-      const cell = [...document.querySelectorAll("td")].find(td =>
+      const label = [...document.querySelectorAll("td")].find(td =>
         td.textContent.includes("Class:")
       );
-      return cell ? cell.nextElementSibling?.innerText?.trim() : null;
+      return label?.nextElementSibling?.innerText?.trim() || null;
     });
 
     await browser.close();
@@ -50,7 +57,11 @@ app.post("/scrape-qbcc", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => res.send("QBCC scraper is running"));
+app.get("/", (req, res) => {
+  res.send("✅ QBCC scraper is running");
+});
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

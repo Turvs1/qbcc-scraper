@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: qbcc-scraper
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    region: oregon
+    runtime: node
+    nodeVersion: 18.19.0

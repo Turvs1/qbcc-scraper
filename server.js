@@ -4,6 +4,9 @@ const puppeteer = require("puppeteer");
 const app = express();
 app.use(express.json());
 
+// Set Puppeteer executable path (important for Render)
+process.env.PUPPETEER_EXECUTABLE_PATH = puppeteer.executablePath();
+
 app.post("/scrape-qbcc", async (req, res) => {
   const { qbcc } = req.body;
 
@@ -14,6 +17,7 @@ app.post("/scrape-qbcc", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: "new",
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",

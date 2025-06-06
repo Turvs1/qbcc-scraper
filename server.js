@@ -14,7 +14,7 @@ app.post("/scrape-qbcc", async (req, res) => {
   try {
     const browser = await puppeteer.launch({
       headless: "new",
-      executablePath: puppeteer.executablePath(), // ✔️ Dynamically grab Chromium path
+      executablePath: puppeteer.executablePath(), // 🔥 This now works because of postinstall
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
